@@ -1,5 +1,5 @@
 {
-  "name": "RevitAuto Flow",
-  "description": "Una guía interactiva y generador de scripts para automatizar la creación de barrios en Revit usando un flujo híbrido con Python/Dynamo.",
+  "name": "RevitScript AI",
+  "description": "Generador universal de scripts de Python para Revit (pyRevit/Dynamo) impulsado por IA.",
   "requestFramePermissions": []
 }

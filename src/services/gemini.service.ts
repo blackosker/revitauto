@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { GoogleGenAI } from '@google/genai';
 
@@ -6,20 +7,9 @@ import { GoogleGenAI } from '@google/genai';
 })
 export class GeminiService {
   private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] || '' });
-  }
-
-  async generatePythonScript(params: {
-    houseFamily: string;
-    treeFamily: string;
-    lotWidth: number;
-    setback: number;
-    description: string;
-  }): Promise<string> {
-    
-    const systemInstruction = `Eres un experto desarrollador de la API de Revit (Revit API) y Python Scripting para pyRevit.
+  
+  // Reusable system instruction for consistency across generation and fixing
+  private readonly systemInstruction = `Eres un experto desarrollador de la API de Revit (Revit API) y Python Scripting para pyRevit.
 Tu objetivo es traducir las solicitudes de lenguaje natural del usuario en código Python listo para ejecutar (Copy-Paste) dentro de Revit.
 
 REGLAS CRÍTICAS DE GENERACIÓN DE CÓDIGO:
@@ -51,27 +41,39 @@ REGLAS CRÍTICAS DE GENERACIÓN DE CÓDIGO:
 5. SALIDA:
    - No des explicaciones teóricas largas.
    - Entrega el código dentro de un bloque de código markdown.
-   - Añade comentarios breves en el código explicando qué hace cada bloque.`;
+   - Añade comentarios breves en el código explicando qué hace cada bloque.
 
+EJEMPLO DE ESTILO ESPERADO:
+
+\`\`\`python
+# Ejemplo: Crear un nivel
+from Autodesk.Revit.DB import *
+# doc = __revit__.ActiveUIDocument.Document
+
+t = Transaction(doc, "Crear Nivel")
+t.Start()
+try:
+    # Usar siempre Create para niveles en versiones nuevas
+    Level.Create(doc, 10.0)
+    t.Commit()
+except Exception as e:
+    t.RollBack()
+    print("Error:", e)
+\`\`\`
+
+Úsalo como guía para la estructura de transacciones e importaciones.`;
+
+  constructor() {
+    this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] || '' });
+  }
+
+  async generatePythonScript(userDescription: string): Promise<string> {
     const userPrompt = `
-      Genera un script de Python para Revit para crear un barrio residencial automatizado.
+      Genera un script de Python para Revit que cumpla con la siguiente solicitud del usuario:
       
-      Parámetros definidos por el usuario:
-      - Nombre de Familia de Casa: "${params.houseFamily}"
-      - Nombre de Familia de Árbol: "${params.treeFamily}"
-      - Ancho del Lote deseado: ${params.lotWidth} metros
-      - Retranqueo (Setback) desde la calle: ${params.setback} metros
-      - Instrucciones extra del usuario: ${params.description}
+      "${userDescription}"
       
-      Lógica del Script requerida:
-      1. Obtener la selección actual de líneas de modelo (ModelCurve) del usuario (usando uidoc.Selection).
-      2. Iterar sobre las líneas seleccionadas.
-      3. Dividir cada línea en segmentos basados en el "Ancho del Lote".
-      4. Calcular el punto de inserción para la casa usando vector perpendicular y el valor de "Retranqueo".
-      5. Colocar una instancia de la familia "${params.houseFamily}" en el punto calculado.
-      6. En el espacio restante del lote, generar puntos aleatorios y colocar instancias de "${params.treeFamily}".
-      
-      Nota: Asegúrate de manejar la conversión de metros a pies correctamente como se indica en las reglas.
+      Asegúrate de importar las librerías necesarias, manejar transacciones si se modifica el modelo, y usar las variables globales doc/uidoc.
     `;
 
     try {
@@ -79,13 +81,44 @@ REGLAS CRÍTICAS DE GENERACIÓN DE CÓDIGO:
         model: 'gemini-2.5-flash',
         contents: userPrompt,
         config: {
-            systemInstruction: systemInstruction
+            systemInstruction: this.systemInstruction
         }
       });
       return response.text.trim();
     } catch (error) {
       console.error('Error generating script:', error);
       return '# Error al generar el script. Por favor verifica tu API Key y vuelve a intentarlo.\n# Detalles: ' + error;
+    }
+  }
+
+  async fixScript(originalCode: string, errorMessage: string): Promise<string> {
+    const fixPrompt = `
+      El siguiente script de Python para Revit generó un error al ejecutarse.
+      
+      CÓDIGO ORIGINAL:
+      ${originalCode}
+      
+      ERROR REPORTADO POR REVIT/PYREVIT:
+      ${errorMessage}
+      
+      TAREA:
+      1. Analiza la causa raíz del error (ej. problemas de indentación, uso incorrecto de la API, tipos de datos, unidades, o falta de transacción activa).
+      2. Corrige el código aplicando las mejores prácticas de la API de Revit.
+      3. Entrégame SOLAMENTE la versión corregida del código, lista para copiar y pegar.
+    `;
+
+    try {
+        const response = await this.ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: fixPrompt,
+            config: {
+                systemInstruction: this.systemInstruction
+            }
+        });
+        return response.text.trim();
+    } catch (error) {
+        console.error('Error fixing script:', error);
+        return '# Error al intentar corregir el código.\n# ' + error;
     }
   }
 

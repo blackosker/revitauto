@@ -1,77 +1,60 @@
 
-<div class="min-h-screen bg-slate-50 flex flex-col">
+<div class="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
   <app-navbar [currentStep]="activeStep()" (stepChange)="setActiveStep($event)"></app-navbar>
 
-  <main class="flex-1 w-full max-w-5xl mx-auto p-6 md:p-8">
+  <main class="max-w-4xl mx-auto mt-8 px-6">
     
-    <!-- Step 0: Intro -->
+    <!-- STEP 0: WELCOME -->
     @if (activeStep() === 0) {
-      <section class="animate-fade-in space-y-8">
-        <div class="text-center space-y-4 py-10">
-          <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Automatiza tu Modelado en <span class="text-indigo-600">Revit</span>
-          </h1>
-          <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Implementa un flujo de trabajo híbrido inteligente. Deja que Revit maneje los activos visuales y usa Python para la lógica de distribución compleja.
-          </p>
-          <button (click)="setActiveStep(1)" class="mt-6 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-1">
-            Comenzar Flujo
-          </button>
+      <div class="flex flex-col items-center text-center mt-20 space-y-6 animate-fade-in">
+        <div class="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
         </div>
-
-        <div class="grid md:grid-cols-2 gap-6 mt-12">
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">1. Biblioteca de Activos</h3>
-            <p class="text-slate-600 text-sm leading-relaxed">
-              No programes geometría. Prepara familias ligeras y robustas (.rfa) que sirvan como bloques de construcción.
-            </p>
-          </div>
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">2. El Cerebro (Python)</h3>
-            <p class="text-slate-600 text-sm leading-relaxed">
-              Usa scripts para la lógica de ubicación. "Pon una casa cada 10 metros". Es más fácil codificar reglas que dibujar líneas a mano.
-            </p>
-          </div>
-        </div>
-      </section>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+          Revit Script <span class="text-indigo-600">Universal</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl">
+          Genera scripts de Python para automatizar cualquier tarea en Revit. 
+          Desde la gestión de parámetros hasta la creación de geometría compleja.
+        </p>
+        <button 
+          (click)="setActiveStep(1)"
+          class="mt-8 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-105"
+        >
+          Crear Nuevo Script
+        </button>
+      </div>
     }
 
-    <!-- Step 1: Assets Checklist -->
+    <!-- STEP 1: REQUIREMENTS CHECKLIST -->
     @if (activeStep() === 1) {
-      <section class="animate-fade-in max-w-3xl mx-auto">
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold text-slate-900">Preparación de la Biblioteca</h2>
-          <p class="text-slate-600 mt-2">Antes de escribir código, asegúrate de tener estas familias cargadas en tu proyecto de Revit.</p>
-        </div>
+      <div class="animate-fade-in">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+          <span class="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+          Requisitos del Sistema
+        </h2>
+        <p class="text-slate-600 mb-8">Para ejecutar los scripts generados, necesitas el siguiente entorno configurado.</p>
 
-        <div class="space-y-4">
+        <div class="grid gap-4">
           @for (item of checklistItems; track item.id) {
             <div 
               (click)="toggleChecklist(item.id)"
-              class="group flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer select-none
-                {{ item.checked ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-200 hover:border-indigo-300' }}"
+              [class]="'p-6 rounded-xl border-2 cursor-pointer transition-all ' + 
+                (item.checked ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 bg-white hover:border-indigo-300')"
             >
-              <div class="flex-shrink-0 mt-1">
-                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                   {{ item.checked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 group-hover:border-indigo-400' }}">
-                   @if (item.checked) {
-                     <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                   }
+              <div class="flex items-start gap-4">
+                <div [class]="'w-6 h-6 rounded flex items-center justify-center mt-1 border transition-colors ' + 
+                  (item.checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300')">
+                  @if (item.checked) {
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  }
                 </div>
-              </div>
-              <div>
-                <h4 class="font-semibold text-slate-900 {{ item.checked ? 'line-through text-indigo-900 opacity-60' : '' }}">
-                  {{ item.title }}
-                </h4>
-                <p class="text-sm text-slate-500 mt-1 {{ item.checked ? 'opacity-60' : '' }}">
-                  {{ item.desc }}
-                </p>
+                <div>
+                  <h3 class="font-bold text-lg text-slate-800">{{ item.title }}</h3>
+                  <p class="text-slate-500">{{ item.desc }}</p>
+                </div>
               </div>
             </div>
           }
@@ -79,191 +62,209 @@
 
         <div class="mt-8 flex justify-end">
           <button 
-            (click)="setActiveStep(2)" 
-            class="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            (click)="setActiveStep(2)"
             [disabled]="!allChecked()"
+            class="px-6 py-3 bg-indigo-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors"
           >
-            Continuar al Script
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            Continuar al Generador
           </button>
         </div>
-      </section>
+      </div>
     }
 
-    <!-- Step 2: Generator -->
+    <!-- STEP 2: GENERATOR FORM -->
     @if (activeStep() === 2) {
-      <section class="animate-fade-in grid lg:grid-cols-2 gap-8 h-full">
-        <!-- Configuration Form -->
-        <div class="space-y-6">
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-              Configuración del Generador
-            </h2>
-            
-            <form [formGroup]="generatorForm" (ngSubmit)="generateScript()" class="space-y-5">
-              
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nombre Familia Casa</label>
-                <input formControlName="houseFamily" type="text" class="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm" placeholder="Ej: Casa_Volumen">
-                <p class="text-xs text-slate-400 mt-1">Debe coincidir EXACTAMENTE con el nombre en Revit.</p>
+      <div class="animate-fade-in h-full">
+         <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+          <span class="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+          Descripción de la Tarea
+        </h2>
+
+        <form [formGroup]="generatorForm" (ngSubmit)="generateScript()" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">¿Qué quieres que haga el script?</label>
+            <div class="relative">
+              <textarea 
+                formControlName="description" 
+                rows="6" 
+                placeholder="Ej: Seleccionar todos los muros del Nivel 1 y cambiar su parámetro 'Comentarios' a 'Revisado'. Si el muro es de tipo 'Exterior', píntalo de color rojo en la vista actual." 
+                class="w-full px-4 py-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm text-base leading-relaxed"
+              ></textarea>
+              <div class="absolute bottom-3 right-3 text-xs text-slate-400">
+                Sé lo más específico posible
               </div>
-
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nombre Familia Árbol</label>
-                <input formControlName="treeFamily" type="text" class="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm" placeholder="Ej: Arbol_Simple">
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Ancho Lote (m)</label>
-                  <input formControlName="lotWidth" type="number" class="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Retranqueo (m)</label>
-                  <input formControlName="setback" type="number" class="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm">
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Instrucciones Extra</label>
-                <textarea formControlName="description" rows="3" class="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm" placeholder="Ej: Añadir rotación aleatoria a los árboles..."></textarea>
-              </div>
-
-              <button 
-                type="submit" 
-                [disabled]="isGenerating() || generatorForm.invalid"
-                class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-md shadow-indigo-100 disabled:opacity-70 disabled:cursor-wait flex justify-center items-center gap-2"
-              >
-                @if (isGenerating()) {
-                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Generando con IA...
-                } @else {
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                  Generar Script Python
-                }
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- Output Area -->
-        <div class="flex flex-col h-full min-h-[500px]">
-          <div class="bg-slate-900 rounded-t-2xl p-4 flex justify-between items-center border-b border-slate-700">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 rounded-full bg-red-500"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500"></div>
-              <span class="ml-2 text-xs font-mono text-slate-400">script_generado.py</span>
             </div>
-            @if (generatedScript()) {
-              <button (click)="copyToClipboard()" class="text-xs text-slate-300 hover:text-white flex items-center gap-1 px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 transition-colors">
-                @if (copied()) {
-                  <span class="text-green-400">¡Copiado!</span>
-                } @else {
-                  <span>Copiar</span>
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                }
-              </button>
-            }
-          </div>
-          <div class="flex-1 bg-slate-950 p-4 overflow-auto rounded-b-2xl font-mono text-sm text-slate-300 relative group">
-             @if (!generatedScript()) {
-               <div class="absolute inset-0 flex items-center justify-center text-slate-600 flex-col gap-2">
-                 <svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                 <p class="text-sm">El código aparecerá aquí</p>
-               </div>
-             }
-             <pre class="whitespace-pre-wrap break-all">{{ generatedScript() }}</pre>
           </div>
 
-          @if (generatedScript()) {
-             <div class="mt-4 flex justify-end">
-                <button (click)="setActiveStep(3)" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center gap-1">
-                  Siguiente paso: Exportar
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          <div class="pt-2 flex justify-end">
+            <button 
+              type="submit" 
+              [disabled]="generatorForm.invalid || isGenerating()"
+              class="w-full md:w-auto flex justify-center items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed transition-all transform active:scale-95"
+            >
+              @if (isGenerating()) {
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analizando con IA...
+              } @else {
+                <span>Generar Python Script</span>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              }
+            </button>
+          </div>
+        </form>
+
+        @if (generatedScript()) {
+          <div class="mt-8 animate-fade-in-up" id="script-result">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <span class="bg-green-100 text-green-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">✓</span>
+                Script Generado
+              </h3>
+              <div class="flex gap-2">
+                 <button (click)="copyToClipboard()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 transition-colors">
+                  @if (copied()) {
+                    <span class="text-green-600">¡Copiado!</span>
+                  } @else {
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    <span>Copiar</span>
+                  }
                 </button>
-             </div>
-          }
-        </div>
-      </section>
+                <button (click)="setActiveStep(3)" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 flex items-center gap-1 transition-colors">
+                   Finalizar
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="relative group">
+              <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl opacity-20 blur group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+              <!-- Code Display Area with Syntax Highlighting -->
+              <div class="relative bg-slate-900 p-6 rounded-xl overflow-hidden border border-slate-800 shadow-2xl max-h-[500px]">
+                 <pre class="font-mono text-sm leading-relaxed text-slate-300 overflow-x-auto h-full" [innerHTML]="formattedCode()"></pre>
+              </div>
+            </div>
+            
+            <!-- Error Correction Section -->
+            <div class="mt-8 pt-8 border-t border-slate-200 animate-fade-in">
+              <h4 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                ¿El script falló? Corrígelo aquí
+              </h4>
+              <div class="bg-red-50 p-6 rounded-xl border border-red-100">
+                <label class="block text-sm font-medium text-red-900 mb-2">Pega el error reportado por Revit/pyRevit:</label>
+                <textarea 
+                  [value]="errorInput()"
+                  (input)="errorInput.set($any($event.target).value)"
+                  rows="3" 
+                  placeholder="Ej: IronPython Traceback: name 'UnitUtils' is not defined..."
+                  class="w-full px-4 py-3 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all placeholder-red-300"
+                ></textarea>
+                
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    (click)="fixCode()"
+                    [disabled]="!errorInput() || isFixing()"
+                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                  >
+                    @if (isFixing()) {
+                       <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Corrigiendo...
+                    } @else {
+                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       Corregir Código
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     }
 
-    <!-- Step 3: Export/Final -->
+    <!-- STEP 3: EXPORT / FINAL -->
     @if (activeStep() === 3) {
-      <section class="animate-fade-in max-w-2xl mx-auto text-center py-12">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <div class="animate-fade-in flex flex-col items-center justify-center py-12 text-center">
+        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-bounce-slow">
+          <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
-        <h2 class="text-3xl font-bold text-slate-900 mb-4">¡Todo listo!</h2>
-        <p class="text-slate-600 mb-8 leading-relaxed">
-          Has completado el flujo. Ahora tienes tus activos preparados y tu script generado. 
-          Copia el código y ejecútalo en <strong>pyRevit</strong>, <strong>Revit Python Shell</strong> o adáptalo para Dynamo.
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">¡Script Listo!</h2>
+        <p class="text-slate-600 mb-10 max-w-lg leading-relaxed">
+          Tu código ha sido generado. Ahora puedes llevarlo a tu entorno de Revit preferido.
         </p>
 
-        <div class="bg-indigo-50 rounded-xl p-6 text-left border border-indigo-100">
-          <h3 class="font-bold text-indigo-900 mb-2">Checklist Final:</h3>
-          <ul class="space-y-2 text-indigo-800 text-sm">
-            <li class="flex items-center gap-2">
-              <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-              Familias cargadas en el proyecto (.rfa)
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-              Líneas seleccionadas en la vista
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-              Ejecutar en pyRevit / Python Shell
-            </li>
-          </ul>
+        <div class="grid md:grid-cols-2 gap-6 w-full max-w-2xl mb-12">
+           <div class="bg-white p-6 rounded-xl border border-slate-200 text-left hover:border-indigo-300 transition-colors">
+             <h3 class="font-bold text-lg text-slate-800 mb-2 flex items-center gap-2">
+               <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+               pyRevit
+             </h3>
+             <p class="text-sm text-slate-500">Crea un nuevo script con Alt + Click en tu barra de herramientas y pega el código.</p>
+           </div>
+           <div class="bg-white p-6 rounded-xl border border-slate-200 text-left hover:border-indigo-300 transition-colors">
+             <h3 class="font-bold text-lg text-slate-800 mb-2 flex items-center gap-2">
+               <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+               Revit Python Shell
+             </h3>
+             <p class="text-sm text-slate-500">Abre la consola interactiva, pega el código y presiona Ejecutar (F5).</p>
+           </div>
         </div>
 
-        <button (click)="setActiveStep(0)" class="mt-8 text-slate-500 hover:text-indigo-600 underline text-sm">
-          Comenzar nuevo flujo
+        <button (click)="setActiveStep(0)" class="text-slate-500 hover:text-indigo-600 font-medium underline underline-offset-4 decoration-slate-300 hover:decoration-indigo-300 transition-all">
+          Generar otro script
         </button>
-      </section>
+      </div>
     }
-    
-    <!-- Assistant Chat Widget (Simple) -->
+
+    <!-- CHAT WIDGET -->
     <div class="fixed bottom-6 right-6 z-40">
        @if (showChat()) {
-         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-80 mb-4 overflow-hidden animate-slide-up">
-           <div class="bg-indigo-600 p-3 flex justify-between items-center">
-             <span class="text-white font-medium text-sm">Asistente BIM</span>
-             <button (click)="toggleChat()" class="text-white opacity-80 hover:opacity-100">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-             </button>
-           </div>
-           <div class="p-4 h-64 overflow-y-auto bg-slate-50 space-y-3">
-             <div class="flex gap-2">
-               <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs">🤖</div>
-               <div class="bg-white p-2 rounded-lg rounded-tl-none shadow-sm text-xs text-slate-700 border border-slate-100">
-                 Hola. ¿Tienes dudas sobre Python en Revit?
-               </div>
-             </div>
-             @if (chatResponse()) {
-               <div class="flex gap-2">
-                 <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs">🤖</div>
-                 <div class="bg-white p-2 rounded-lg rounded-tl-none shadow-sm text-xs text-slate-700 border border-slate-100">
-                   {{ chatResponse() }}
-                 </div>
-               </div>
-             }
-           </div>
-           <div class="p-3 border-t bg-white flex gap-2">
-             <input #chatInput type="text" class="flex-1 text-xs border-slate-200 rounded px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Pregunta algo...">
-             <button (click)="askAi(chatInput.value); chatInput.value=''" class="bg-indigo-600 text-white rounded p-1.5 hover:bg-indigo-700">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-             </button>
-           </div>
-         </div>
+        <div class="bg-white w-80 md:w-96 rounded-2xl shadow-2xl border border-slate-200 mb-4 animate-fade-in-up flex flex-col overflow-hidden">
+          <div class="bg-indigo-600 p-4 flex justify-between items-center text-white">
+            <h3 class="font-bold">Asistente IA</h3>
+            <button (click)="toggleChat()" class="hover:bg-indigo-700 p-1 rounded">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <div class="p-4 bg-slate-50 min-h-[150px] max-h-[300px] overflow-y-auto text-sm text-slate-700">
+            @if (chatResponse()) {
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mb-2">
+                {{ chatResponse() }}
+              </div>
+            } @else {
+               <p class="text-slate-400 text-center mt-4">Pregúntame algo sobre Revit API o Python...</p>
+            }
+          </div>
+          <div class="p-3 bg-white border-t border-slate-100">
+            <input 
+              #chatInput
+              (keyup.enter)="askAi(chatInput.value); chatInput.value = ''"
+              type="text" 
+              placeholder="Escribe tu duda..." 
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+            >
+          </div>
+        </div>
        }
-       <button (click)="toggleChat()" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+       
+       <button 
+        (click)="toggleChat()"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
+       >
+         @if (showChat()) {
+           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+         } @else {
+           <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+         }
        </button>
     </div>
 
