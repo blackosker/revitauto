@@ -95,7 +95,7 @@ REGLAS INQUEBRANTABLES:
       Recuerda: Convertir Metros a Pies, usar Transacciones seguras y el boilerplate de importación correcto.
     `;
 
-    // Enhance prompt for 'pro' mode for more detailed reasoning
+    // 1. Logic for "Pro" Prompt Enhancement
     if (modelMode === 'pro') {
       const proInstruction = `
         [MODO DE RAZONAMIENTO MATEMÁTICO ACTIVADO]
@@ -105,13 +105,26 @@ REGLAS INQUEBRANTABLES:
       userPrompt = proInstruction + userPrompt;
     }
 
+    // 2. Dynamic Model Configuration
+    // We strictly use 'gemini-2.5-flash' as it's the current standard, but we adjust the
+    // Thinking Budget to simulate "Flash" (Speed) vs "Pro" (Reasoning).
+    const modelName = 'gemini-2.5-flash';
+    
+    const config: any = {
+        systemInstruction: this.systemInstruction
+    };
+
+    if (modelMode === 'flash') {
+        // Flash Mode: Set thinkingBudget to 0 for lowest latency (Pure speed)
+        config.thinkingConfig = { thinkingBudget: 0 };
+    } 
+    // Pro Mode: We omit thinkingConfig to allow the default reasoning budget (High Quality)
+
     try {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash', // Always use the allowed model
+        model: modelName, 
         contents: userPrompt,
-        config: {
-            systemInstruction: this.systemInstruction
-        }
+        config: config
       });
       return response.text.trim();
     } catch (error) {

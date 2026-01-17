@@ -200,6 +200,13 @@
                   Script Generado
                 </h3>
                 <div class="flex gap-2">
+                   <!-- Download Button -->
+                   <button (click)="downloadScript()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 flex items-center gap-1 transition-colors" aria-label="Descargar archivo Python">
+                      <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                      <span class="hidden sm:inline">Descargar .py</span>
+                   </button>
+
+                   <!-- Copy Button -->
                    <button (click)="copyToClipboard()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 transition-colors" aria-label="Copiar código al portapapeles">
                     @if (copied()) {
                       <span class="text-green-600">¡Copiado!</span>

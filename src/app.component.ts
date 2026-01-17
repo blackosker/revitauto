@@ -234,6 +234,27 @@ export class AppComponent {
     }
   }
 
+  downloadScript() {
+    let script = this.generatedScript();
+    // Clean up markdown tags for file download
+    script = script.replace(/^```python/gm, '').replace(/^```/gm, '').trim();
+
+    if (!script) return;
+
+    const blob = new Blob([script], { type: 'text/x-python;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    // Generate filename with timestamp
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19); // YYYY-MM-DDTHH-mm-ss
+    a.href = url;
+    a.download = `script_revit_${timestamp}.py`;
+    
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   toggleChat() {
     this.showChat.update(v => !v);
   }
