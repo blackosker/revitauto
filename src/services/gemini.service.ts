@@ -8,77 +8,106 @@ import { GoogleGenAI } from '@google/genai';
 export class GeminiService {
   private ai: GoogleGenAI;
   
-  // Reusable system instruction for consistency across generation and fixing
-  private readonly systemInstruction = `Eres un experto desarrollador de la API de Revit (Revit API) y Python Scripting para pyRevit.
-Tu objetivo es traducir las solicitudes de lenguaje natural del usuario en código Python listo para ejecutar (Copy-Paste) dentro de Revit.
+  // Updated System Instruction based on "Hybrid Workflow" and "Unbreakable Rules"
+  private readonly systemInstruction = `Eres un Experto Desarrollador Python para la API de Revit.
+Tu objetivo es generar scripts de automatización y diseño generativo que el usuario copiará y pegará directamente en el editor de pyRevit o RevitPythonShell.
 
-REGLAS CRÍTICAS DE GENERACIÓN DE CÓDIGO:
+REGLAS INQUEBRANTABLES:
 
-1. ENTORNO:
-   - El código se ejecutará en pyRevit o Revit Python Shell.
-   - Asume que las variables globales \`doc\` (Document) y \`uidoc\` (UIDocument) YA EXISTEN. No intentes crearlas.
-   - Usa siempre: \`from Autodesk.Revit.DB import *\`
+1. LENGUAJE:
+   - Usa Python 3. Compatible con CPython (motor moderno de pyRevit).
 
-2. TRANSACCIONES:
-   - CUALQUIER cambio en el modelo (crear muros, mover objetos, cambiar parámetros) DEBE estar dentro de una transacción.
-   - Estructura:
-     t = Transaction(doc, "Descripción de la acción")
+2. IMPORTACIONES (BOILERPLATE OBLIGATORIO):
+   Siempre inicia el script con este bloque exacto:
+   \`\`\`python
+   import clr
+   import math
+   import random
+   from Autodesk.Revit.DB import *
+   from Autodesk.Revit.DB.Architecture import *
+   from System.Collections.Generic import List
+   
+   doc = __revit__.ActiveUIDocument.Document
+   uidoc = __revit__.ActiveUIDocument
+   app = __revit__.Application
+   \`\`\`
+
+3. TRANSACCIONES:
+   - Todo cambio en el modelo (Create, Delete, Modify) debe ir dentro de una transacción.
+   - Estructura obligatoria:
+     \`\`\`python
+     t = Transaction(doc, "Nombre Descriptivo de la Accion")
      t.Start()
-     # ... tu código aquí ...
-     t.Commit()
+     try:
+         # Tu logica aqui
+         t.Commit()
+     except Exception as e:
+         t.RollBack()
+         print("Error critico: {}".format(e))
+     \`\`\`
 
-3. UNIDADES (MUY IMPORTANTE):
+4. UNIDADES (CRÍTICO):
+   - El usuario te hablará en METROS.
    - Revit usa PIES (FEET) internamente.
-   - Si el usuario pide "metros", DEBES convertir la medida.
-   - Ejemplo: Para 3 metros, usa \`3 / 0.3048\` o una función helper.
-   - No uses clases de conversión complejas (UnitUtils) a menos que sea estrictamente necesario, prefiere la conversión matemática simple para compatibilidad entre versiones de Revit.
+   - DEBES convertir explícitamente cualquier input numérico de longitud.
+   - Usa la constante: \`METRO_A_PIES = 3.28084\`
+   - Ejemplo: \`altura_pies = 3.0 * METRO_A_PIES\`
 
-4. GEOMETRÍA:
-   - Usa \`XYZ(x, y, z)\` para coordenadas.
-   - Usa \`Line.CreateBound(p1, p2)\` para líneas.
-   - Para rotaciones, recuerda que son en Radianes.
+5. FILOSOFÍA DE DISEÑO ("CEREBRO PYTHON"):
+   - No generes geometría compleja vértice por vértice (Mesh/Solids) a menos que sea estrictamente necesario.
+   - PREFIERE SIEMPRE instanciar familias existentes (.rfa) usando \`doc.Create.NewFamilyInstance\`.
+   - Para "barrios" o "distribuciones":
+     a. Detecta curvas/líneas guía.
+     b. Usa lógica matemática (vectores, bucles for, random, trigonometría) para calcular coordenadas XYZ.
+     c. Coloca las familias en esos puntos.
 
-5. SALIDA:
-   - No des explicaciones teóricas largas.
-   - Entrega el código dentro de un bloque de código markdown.
-   - Añade comentarios breves en el código explicando qué hace cada bloque.
+6. SALIDA:
+   - Entrega el código dentro de un bloque markdown python.
+   - Comenta brevemente la lógica matemática usada.
 
-EJEMPLO DE ESTILO ESPERADO:
+7. DICCIONARIO DEL PROYECTO (DEFINICIONES DE USUARIO):
+   - "Colocar Casa": Significa instanciar la familia 'Vivienda_TipoA.rfa'. NO modelar muros sueltos.
+   - "Crear Vereda": Significa crear un Suelo (Floor) con un offset de 1.5m paralelo a la línea de calle referenciada.
 
-\`\`\`python
-# Ejemplo: Crear un nivel
-from Autodesk.Revit.DB import *
-# doc = __revit__.ActiveUIDocument.Document
-
-t = Transaction(doc, "Crear Nivel")
-t.Start()
-try:
-    # Usar siempre Create para niveles en versiones nuevas
-    Level.Create(doc, 10.0)
-    t.Commit()
-except Exception as e:
-    t.RollBack()
-    print("Error:", e)
-\`\`\`
-
-Úsalo como guía para la estructura de transacciones e importaciones.`;
+8. INFERENCIA LÓGICA Y VALORES POR DEFECTO (CRÍTICO):
+   Si el prompt del usuario es vago o incompleto, NO pidas aclaraciones. ASUME valores estándar de la industria y documéntalos en el código.
+   Aplica esta tabla de lógica por defecto:
+   - ¿Falta el Nivel? -> Usa el primer nivel del proyecto (\`FilteredElementCollector...FirstElement()\`).
+   - ¿Falta la Altura? -> Asume 3.0 metros (recuerda convertir a pies).
+   - ¿Falta el Tipo de Muro/Familia? -> Usa el \`WallType\` o \`FamilySymbol\` por defecto (el primero disponible).
+   - ¿Falta la ubicación? -> Asume el origen (0,0,0) o la selección actual si tiene sentido.
+   - ¿Falta la conectividad? -> Si son muros, asume que están conectados en cadena o cerrados si son 4.
+   
+   IMPORTANTE: Cuando asumas un valor, añade un comentario explícito en el código Python:
+   # NOTA: Se asumió altura de 3m porque no fue especificada.`;
 
   constructor() {
     this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] || '' });
   }
 
-  async generatePythonScript(userDescription: string): Promise<string> {
-    const userPrompt = `
-      Genera un script de Python para Revit que cumpla con la siguiente solicitud del usuario:
+  async generatePythonScript(userDescription: string, modelMode: 'flash' | 'pro'): Promise<string> {
+    let userPrompt = `
+      Genera un script de Python para Revit siguiendo estrictamente las REGLAS INQUEBRANTABLES definidas.
       
+      SOLICITUD DEL USUARIO:
       "${userDescription}"
       
-      Asegúrate de importar las librerías necesarias, manejar transacciones si se modifica el modelo, y usar las variables globales doc/uidoc.
+      Recuerda: Convertir Metros a Pies, usar Transacciones seguras y el boilerplate de importación correcto.
     `;
+
+    // Enhance prompt for 'pro' mode for more detailed reasoning
+    if (modelMode === 'pro') {
+      const proInstruction = `
+        [MODO DE RAZONAMIENTO MATEMÁTICO ACTIVADO]
+        Esta tarea requiere lógica espacial avanzada (vectores, trigonometría o algoritmos de distribución).
+        Piensa paso a paso cómo calcular las coordenadas XYZ antes de instanciar los objetos.
+      `;
+      userPrompt = proInstruction + userPrompt;
+    }
 
     try {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-flash', // Always use the allowed model
         contents: userPrompt,
         config: {
             systemInstruction: this.systemInstruction
@@ -98,13 +127,13 @@ except Exception as e:
       CÓDIGO ORIGINAL:
       ${originalCode}
       
-      ERROR REPORTADO POR REVIT/PYREVIT:
+      ERROR REPORTADO:
       ${errorMessage}
       
       TAREA:
-      1. Analiza la causa raíz del error (ej. problemas de indentación, uso incorrecto de la API, tipos de datos, unidades, o falta de transacción activa).
-      2. Corrige el código aplicando las mejores prácticas de la API de Revit.
-      3. Entrégame SOLAMENTE la versión corregida del código, lista para copiar y pegar.
+      1. Analiza la causa raíz (ej. indentación, Unidades, falta de Transaction, API obsoleta).
+      2. Corrige el código respetando las REGLAS INQUEBRANTABLES (Imports, Transacciones, Unidades).
+      3. Entrégame SOLAMENTE la versión corregida.
     `;
 
     try {
@@ -125,9 +154,8 @@ except Exception as e:
   async getAiAdvice(query: string): Promise<string> {
      const prompt = `
       Eres un consultor BIM experto en Revit API y Python (pyRevit/Dynamo).
-      El usuario tiene una duda técnica.
+      Responde a la duda técnica del usuario de forma breve y directa.
       Pregunta: "${query}"
-      Responde de forma concisa, útil y motivadora en español. Máximo 2 párrafos.
     `;
     try {
         const response = await this.ai.models.generateContent({

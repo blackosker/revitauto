@@ -2,7 +2,7 @@
 <div class="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
   <app-navbar [currentStep]="activeStep()" (stepChange)="setActiveStep($event)"></app-navbar>
 
-  <main class="max-w-4xl mx-auto mt-8 px-6">
+  <main class="max-w-6xl mx-auto mt-8 px-6">
     
     <!-- STEP 0: WELCOME -->
     @if (activeStep() === 0) {
@@ -82,22 +82,92 @@
 
         <form [formGroup]="generatorForm" (ngSubmit)="generateScript()" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
           
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">¿Qué quieres que haga el script?</label>
-            <div class="relative">
-              <textarea 
-                formControlName="description" 
-                rows="6" 
-                placeholder="Ej: Seleccionar todos los muros del Nivel 1 y cambiar su parámetro 'Comentarios' a 'Revisado'. Si el muro es de tipo 'Exterior', píntalo de color rojo en la vista actual." 
-                class="w-full px-4 py-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm text-base leading-relaxed"
-              ></textarea>
-              <div class="absolute bottom-3 right-3 text-xs text-slate-400">
-                Sé lo más específico posible
+          <!-- STRATEGY GUIDE BOX -->
+          <div class="bg-indigo-50 border-l-4 border-indigo-500 p-5 rounded-r-xl mb-4">
+            <h3 class="font-bold text-indigo-800 flex items-center gap-2 mb-2">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Estrategia de Diseño Híbrido
+            </h3>
+            <div class="flex flex-col md:flex-row gap-6 text-sm text-indigo-900/80">
+              <div class="flex-1">
+                <span class="font-bold uppercase text-xs tracking-wider text-indigo-600 mb-1 block">Paso 1: Revit (Biblioteca)</span>
+                <p>No modeles geometría compleja con código. Ten listas tus familias (ej: <code>Arbol.rfa</code>, <code>Casa_Volumen.rfa</code>) cargadas en el proyecto.</p>
+              </div>
+              <div class="flex-1">
+                <span class="font-bold uppercase text-xs tracking-wider text-indigo-600 mb-1 block">Paso 2: Python (Cerebro)</span>
+                <p>Usa este script para controlar <strong>dónde</strong> y <strong>cómo</strong> se colocan esos activos usando lógica matemática (vectores, random, grillas).</p>
               </div>
             </div>
           </div>
 
-          <div class="pt-2 flex justify-end">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Instrucciones para el Script</label>
+            <div class="relative">
+              <textarea 
+                formControlName="description" 
+                rows="6" 
+                placeholder="Ej: Detecta las líneas de modelo seleccionadas (Calles). Calcula lotes perpendiculares cada 10m e inserta la familia 'Casa_Volumen' en el centro de cada lote." 
+                class="w-full px-4 py-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm text-base leading-relaxed"
+              ></textarea>
+              <div class="absolute bottom-3 right-3 text-xs text-slate-400">
+                Sé específico con los nombres de Familia
+              </div>
+            </div>
+            
+            <!-- Quick Templates -->
+            <div class="mt-4 flex flex-wrap gap-2 items-center animate-fade-in">
+               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Plantillas Generativas:</span>
+               @for (t of templates; track t.label) {
+                 <button
+                   type="button"
+                   (click)="applyTemplate(t.prompt)"
+                   class="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-700 text-xs font-semibold rounded-full transition-all active:scale-95"
+                 >
+                   {{ t.label }}
+                 </button>
+               }
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end items-center gap-4">
+            <!-- Advanced Settings -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleSettings()"
+                class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                title="Configuración avanzada"
+                aria-label="Configuración avanzada del modelo"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              </button>
+              
+              @if (showSettings()) {
+                <div class="absolute bottom-full right-0 z-10 mb-2 w-64 bg-white p-4 rounded-xl shadow-lg border border-slate-200 animate-fade-in-up">
+                  <label class="block text-sm font-bold text-slate-800 mb-2">Modelo de IA</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button 
+                      type="button"
+                      (click)="modelMode.set('flash')"
+                      [class]="'text-center p-2 rounded-lg text-sm transition-colors ' + (modelMode() === 'flash' ? 'bg-indigo-600 text-white font-semibold shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700')"
+                    >
+                      Velocidad
+                      <span class="block text-xs opacity-70">(Flash)</span>
+                    </button>
+                    <button 
+                      type="button"
+                      (click)="modelMode.set('pro')"
+                      [class]="'text-center p-2 rounded-lg text-sm transition-colors ' + (modelMode() === 'pro' ? 'bg-indigo-600 text-white font-semibold shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700')"
+                    >
+                      Razonamiento
+                      <span class="block text-xs opacity-70">(Pro)</span>
+                    </button>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-3">El modo 'Razonamiento' es ideal para geometría o lógica compleja.</p>
+                </div>
+              }
+            </div>
+            
             <button 
               type="submit" 
               [disabled]="generatorForm.invalid || isGenerating()"
@@ -120,72 +190,109 @@
         </form>
 
         @if (generatedScript()) {
-          <div class="mt-8 animate-fade-in-up" id="script-result">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <span class="bg-green-100 text-green-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">✓</span>
-                Script Generado
-              </h3>
-              <div class="flex gap-2">
-                 <button (click)="copyToClipboard()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 transition-colors">
-                  @if (copied()) {
-                    <span class="text-green-600">¡Copiado!</span>
-                  } @else {
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                    <span>Copiar</span>
-                  }
-                </button>
-                <button (click)="setActiveStep(3)" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 flex items-center gap-1 transition-colors">
-                   Finalizar
-                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-              </div>
-            </div>
+          <div class="mt-8 animate-fade-in-up lg:flex lg:gap-6" id="script-result">
             
-            <div class="relative group">
-              <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl opacity-20 blur group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-              <!-- Code Display Area with Syntax Highlighting -->
-              <div class="relative bg-slate-900 p-6 rounded-xl overflow-hidden border border-slate-800 shadow-2xl max-h-[500px]">
-                 <pre class="font-mono text-sm leading-relaxed text-slate-300 overflow-x-auto h-full" [innerHTML]="formattedCode()"></pre>
-              </div>
-            </div>
-            
-            <!-- Error Correction Section -->
-            <div class="mt-8 pt-8 border-t border-slate-200 animate-fade-in">
-              <h4 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                ¿El script falló? Corrígelo aquí
-              </h4>
-              <div class="bg-red-50 p-6 rounded-xl border border-red-100">
-                <label class="block text-sm font-medium text-red-900 mb-2">Pega el error reportado por Revit/pyRevit:</label>
-                <textarea 
-                  [value]="errorInput()"
-                  (input)="errorInput.set($any($event.target).value)"
-                  rows="3" 
-                  placeholder="Ej: IronPython Traceback: name 'UnitUtils' is not defined..."
-                  class="w-full px-4 py-3 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all placeholder-red-300"
-                ></textarea>
-                
-                <div class="mt-4 flex justify-end">
-                  <button 
-                    (click)="fixCode()"
-                    [disabled]="!errorInput() || isFixing()"
-                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                  >
-                    @if (isFixing()) {
-                       <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Corrigiendo...
+            <!-- Main Content: Code + Fixer -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <span class="bg-green-100 text-green-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">✓</span>
+                  Script Generado
+                </h3>
+                <div class="flex gap-2">
+                   <button (click)="copyToClipboard()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 transition-colors" aria-label="Copiar código al portapapeles">
+                    @if (copied()) {
+                      <span class="text-green-600">¡Copiado!</span>
                     } @else {
-                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                       Corregir Código
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                      <span>Copiar</span>
                     }
+                  </button>
+                  <button (click)="setActiveStep(3)" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 flex items-center gap-1 transition-colors">
+                     Finalizar
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                   </button>
                 </div>
               </div>
+              
+              <div class="relative group">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl opacity-20 blur group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                <!-- Code Display Area with Syntax Highlighting -->
+                <div class="relative bg-slate-900 p-6 rounded-xl overflow-hidden border border-slate-800 shadow-2xl max-h-[600px] overflow-y-auto">
+                   <pre class="font-mono text-sm leading-relaxed text-slate-300 overflow-x-auto" [innerHTML]="formattedCode()"></pre>
+                </div>
+              </div>
+              
+              <!-- Error Correction Section -->
+              <div class="mt-8 pt-8 border-t border-slate-200 animate-fade-in">
+                <h4 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  ¿El script falló? Corrígelo aquí
+                </h4>
+                <div class="bg-red-50 p-6 rounded-xl border border-red-100">
+                  <label class="block text-sm font-medium text-red-900 mb-2">Pega el error reportado por Revit/pyRevit:</label>
+                  <textarea 
+                    [value]="errorInput()"
+                    (input)="updateErrorInput($event)"
+                    rows="3" 
+                    placeholder="Ej: IronPython Traceback: name 'UnitUtils' is not defined..."
+                    class="w-full px-4 py-3 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all placeholder-red-300"
+                  ></textarea>
+                  
+                  <div class="mt-4 flex justify-end">
+                    <button 
+                      (click)="fixCode()"
+                      [disabled]="!errorInput() || isFixing()"
+                      class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                    >
+                      @if (isFixing()) {
+                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Corrigiendo...
+                      } @else {
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                         Corregir Código
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <!-- Sidebar: History -->
+             <div class="w-full lg:w-72 mt-8 lg:mt-0 flex-shrink-0 animate-fade-in delay-100">
+               <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm sticky top-24">
+                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                   <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                   <h5 class="font-bold text-sm text-slate-700">Historial Reciente</h5>
+                 </div>
+                 <div class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
+                   @if (scriptHistory().length === 0) {
+                     <div class="p-6 text-center text-slate-400 text-sm">
+                       No hay scripts previos en esta sesión.
+                     </div>
+                   } @else {
+                     @for (item of scriptHistory(); track item.timestamp) {
+                       <button 
+                         (click)="restoreHistory(item)"
+                         class="w-full text-left p-4 hover:bg-slate-50 transition-colors group"
+                       >
+                         <div class="flex justify-between items-start mb-1">
+                           <span class="text-xs font-semibold text-slate-500">{{ item.timestamp | date:'shortTime' }}</span>
+                           <span class="text-xs text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">Restaurar</span>
+                         </div>
+                         <p class="text-sm text-slate-700 line-clamp-2 leading-snug">
+                           {{ item.prompt }}
+                         </p>
+                       </button>
+                     }
+                   }
+                 </div>
+               </div>
+             </div>
+
           </div>
         }
       </div>
@@ -231,7 +338,7 @@
         <div class="bg-white w-80 md:w-96 rounded-2xl shadow-2xl border border-slate-200 mb-4 animate-fade-in-up flex flex-col overflow-hidden">
           <div class="bg-indigo-600 p-4 flex justify-between items-center text-white">
             <h3 class="font-bold">Asistente IA</h3>
-            <button (click)="toggleChat()" class="hover:bg-indigo-700 p-1 rounded">
+            <button (click)="toggleChat()" class="hover:bg-indigo-700 p-1 rounded" aria-label="Cerrar chat">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -259,6 +366,7 @@
        <button 
         (click)="toggleChat()"
         class="bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
+        aria-label="Abrir asistente IA"
        >
          @if (showChat()) {
            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>

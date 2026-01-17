@@ -1,3 +1,4 @@
+
 import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -10,6 +11,12 @@ interface ChecklistItem {
   title: string;
   desc: string;
   checked: boolean;
+}
+
+interface HistoryItem {
+  timestamp: Date;
+  prompt: string;
+  code: string;
 }
 
 @Component({
@@ -30,9 +37,24 @@ export class AppComponent {
   generatedScript = signal('');
   copied = signal(false);
   
+  // History State
+  scriptHistory = signal<HistoryItem[]>([]);
+  
   // Fix Flow State
   isFixing = signal(false);
   errorInput = signal('');
+
+  // Model Settings
+  modelMode = signal<'flash' | 'pro'>('flash');
+  showSettings = signal(false);
+
+  // Quick Templates - Updated for Generative/Hybrid Workflow
+  templates = [
+    { label: '🏡 Generar Barrio', prompt: 'Detecta las Líneas de Modelo seleccionadas (Calles). Calcula lotes perpendiculares cada 10 metros. Inserta la familia "Casa_Volumen" en el centro de cada lote y aleatoriamente coloca "Arbol_Simple" en los espacios sobrantes.' },
+    { label: '🌳 Dispersar Vegetación', prompt: 'Selecciona la Topografía (Toposolid) activa. Genera 50 puntos aleatorios sobre su superficie y coloca la familia "Arbol_Roble". Aplica una rotación aleatoria de 0 a 360 grados y un cambio de escala del 0.8 al 1.2 a cada instancia.' },
+    { label: '🧱 Fachada Paramétrica', prompt: 'Sobre el Muro seleccionado, crea una grilla de paneles. Inserta la familia "Panel_Solar" en cada celda. Haz que el ángulo de rotación de cada panel dependa de su altura Z (más alto = más abierto).' },
+    { label: '📏 Renombrar Inteligente', prompt: 'Busca todas las vistas del navegador que contengan "PLANTA" y reemplázalo por "NIVEL". Ignora las vistas de plantilla.' }
+  ];
   
   // Computed signal for Syntax Highlighting
   formattedCode = computed((): SafeHtml => {
@@ -49,8 +71,6 @@ export class AppComponent {
       .replace(/>/g, "&gt;");
 
     // 3. Tokenizer Strategy: 
-    // We replace strings and comments with placeholders first to prevent
-    // highlighting keywords inside them.
     const tokens: string[] = [];
     const saveToken = (content: string) => {
       tokens.push(content);
@@ -60,8 +80,9 @@ export class AppComponent {
     // A. Comments (Gray)
     code = code.replace(/(#.*$)/gm, match => saveToken(`<span class="text-slate-500 italic">${match}</span>`));
 
-    // B. Strings (Green) - Handles single and double quotes
-    code = code.replace(/(".*?"|'.*?')/g, match => saveToken(`<span class="text-green-400">${match}</span>`));
+    // B. Strings (Green) - Handles single/double quotes AND escaped quotes (QA Fix)
+    // Regex explanation: Match quote, then any escaped char OR any non-slash/non-quote char, repeated, then close quote.
+    code = code.replace(/(["'])(?:\\.|[^\\])*?\1/g, match => saveToken(`<span class="text-green-400">${match}</span>`));
 
     // C. Keywords (Pink/Purple)
     const keywords = /\b(def|class|import|from|return|if|else|elif|try|except|for|in|while|as|print|pass|with|global|lambda)\b/g;
@@ -114,6 +135,25 @@ export class AppComponent {
     return this.checklistItems.every(i => i.checked);
   }
 
+  applyTemplate(prompt: string) {
+    this.generatorForm.patchValue({ description: prompt });
+  }
+
+  restoreHistory(item: HistoryItem) {
+    this.generatedScript.set(item.code);
+    this.generatorForm.patchValue({ description: item.prompt });
+  }
+
+  toggleSettings() {
+    this.showSettings.update(v => !v);
+  }
+  
+  // QA: Helper to avoid $any in template
+  updateErrorInput(event: Event) {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.errorInput.set(value);
+  }
+
   async generateScript() {
     if (this.generatorForm.invalid) return;
 
@@ -124,8 +164,14 @@ export class AppComponent {
     const description = this.generatorForm.get('description')?.value;
     
     try {
-      const script = await this.geminiService.generatePythonScript(description);
+      const script = await this.geminiService.generatePythonScript(description, this.modelMode());
       this.generatedScript.set(script);
+
+      // Add to history if successful
+      if (!script.startsWith('# Error')) {
+        this.addHistoryItem(description, script);
+      }
+
     } catch (error) {
       console.error(error);
       this.generatedScript.set('# Error inesperado. Intenta de nuevo.');
@@ -146,11 +192,28 @@ export class AppComponent {
         const fixedScript = await this.geminiService.fixScript(original, err);
         this.generatedScript.set(fixedScript);
         this.errorInput.set(''); 
+        
+        // QA Fix: Save the fixed version to history so user doesn't lose it
+        const currentPrompt = this.generatorForm.get('description')?.value || 'Script corregido';
+        this.addHistoryItem(`(Corrección) ${currentPrompt}`, fixedScript);
+        
     } catch (error) {
         console.error('Fix failed', error);
     } finally {
         this.isFixing.set(false);
     }
+  }
+  
+  private addHistoryItem(prompt: string, code: string) {
+    this.scriptHistory.update(prev => {
+      const newItem: HistoryItem = {
+        timestamp: new Date(),
+        prompt: prompt,
+        code: code
+      };
+      // Keep only last 5
+      return [newItem, ...prev].slice(0, 5);
+    });
   }
 
   async copyToClipboard() {
